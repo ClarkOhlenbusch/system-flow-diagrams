@@ -1,0 +1,7 @@
+# Personal reference: retained locally, excluded from the public package.
+/system-flow-diagrams/assets/builder-experience.html
+/.local/
+/work/
+.DS_Store
+Thumbs.db
+*.tmp
