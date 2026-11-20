@@ -4,9 +4,11 @@ An agent skill for making interactive system-flow diagrams: a movable mesh canva
 
 Describe a system to your existing coding agent. It copies the starter, edits the diagram content, and gives you an HTML file to open in a browser.
 
+[Try the interactive demo](https://clarkohlenbusch.github.io/system-flow-diagrams/) · [Open the generic starter](https://clarkohlenbusch.github.io/system-flow-diagrams/system-flow-diagrams/assets/starter.html)
+
 ## Use it
 
-Download this repository, or clone it once it has been published:
+Download this repository, or clone it:
 
 ```sh
 git clone https://github.com/ClarkOhlenbusch/system-flow-diagrams.git
@@ -25,7 +27,7 @@ For another project, copy the entire `system-flow-diagrams` folder and give your
 - [How this skill works](how-it-works.html): the skill, reference, coding agent, HTML artifact, and presenter.
 - [Generic checkout starter](system-flow-diagrams/assets/starter.html): a small service communication example you can adapt.
 
-Download and open these HTML files; GitHub's file browser displays source. A GitHub Pages demo can expose them directly in the browser; see below.
+Download and open these HTML files, or use the live links above. GitHub's file browser displays source.
 
 Use the bottom phase buttons, Space, or Left/Right to advance. Drag cards; their connections follow. Drag boundary headers/borders to move them, and corners to resize them. Pan empty canvas. Ctrl/Cmd/Alt + scroll or +/- zooms. F fits, R resets, and numeric keys select phases. Boundary movement is independent of the cards inside it. Adjustments last for the current page session; edit the source to preserve a layout.
 
