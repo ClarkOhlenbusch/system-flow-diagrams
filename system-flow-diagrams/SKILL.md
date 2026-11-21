@@ -1,6 +1,8 @@
 ---
 name: system-flow-diagrams
-description: Create or edit interactive HTML system-flow diagrams with a movable mesh canvas, semantic colors, labeled curved connections, fitted boundaries, and bottom flow controls.
+description: Create or edit interactive system flow diagrams in a standalone HTML file. Use when asked to visualize software architecture, API request flows, service communication, or event-driven workflows with draggable components, labeled arrows, and step-by-step playback.
+license: MIT
+compatibility: Requires filesystem access to copy and edit the starter. Viewing diagrams requires a browser and internet access for CDN-hosted libraries and fonts.
 ---
 
 # System-flow diagrams

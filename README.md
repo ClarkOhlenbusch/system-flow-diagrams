@@ -1,54 +1,71 @@
 # System Flow Diagrams
 
-An agent skill for making interactive system-flow diagrams: a movable mesh canvas, colored service cards, labeled curved arrows, fitted boundaries, and a small bottom flow dock.
+An open-source Agent Skill for turning software architecture, API requests, and event-driven workflows into interactive HTML diagrams. Drag components and boundaries, follow labeled arrows, and step through each phase from the bottom dock.
 
-Describe a system to your existing coding agent. It copies the starter, edits the diagram content, and gives you an HTML file to open in a browser.
+[Try the live demo](https://clarkohlenbusch.github.io/system-flow-diagrams/) · [Read the skill](system-flow-diagrams/SKILL.md) · [Install](#install)
 
-[Try the interactive demo](https://clarkohlenbusch.github.io/system-flow-diagrams/) · [Open the generic starter](https://clarkohlenbusch.github.io/system-flow-diagrams/system-flow-diagrams/assets/starter.html)
+## Examples
 
-## Use it
+### Webhook delivery
 
-Download this repository, or clone it:
+A signed event reaches a public receiver, enters a durable queue, and gets recorded by a background worker. The screenshot shows the **Process** phase.
+
+![Webhook delivery diagram with a delivery queue, worker, and event store connected by labeled arrows](examples/screenshots/webhook-processing.png)
+
+[Open the interactive webhook example](https://clarkohlenbusch.github.io/system-flow-diagrams/examples/webhook-delivery.html) · [View the HTML source](examples/webhook-delivery.html)
+
+> Create an interactive HTML architecture diagram for webhook delivery. Show a producer sending a signed event, a receiver validating it and durably queuing it before returning HTTP 202, and a worker recording it in the event store. Keep the public edge and event-processing boundaries visible.
+
+### Order checkout
+
+Follow a checkout through identity verification, order creation, payment authorization, and receipt delivery. The screenshot shows the **Payment** phase with separate request and response arrows.
+
+![Order checkout diagram showing authorization and approval arrows between the order service and payment provider](examples/screenshots/checkout-payment.png)
+
+[Open the interactive checkout starter](https://clarkohlenbusch.github.io/system-flow-diagrams/system-flow-diagrams/assets/starter.html) · [View the HTML source](system-flow-diagrams/assets/starter.html)
+
+> Create `checkout.html` from our checkout architecture. Show the customer, API gateway, identity provider, order service, payment provider, and receipt worker. Split the flow into request, identity, order creation, payment, and notification phases.
+
+[See how the skill works](https://clarkohlenbusch.github.io/system-flow-diagrams/) · [View the walkthrough source](how-it-works.html)
+
+## Install
+
+From the project where you want to use the skill, run the [skills CLI](https://skills.sh/docs/cli):
 
 ```sh
-git clone https://github.com/ClarkOhlenbusch/system-flow-diagrams.git
+npx skills add ClarkOhlenbusch/system-flow-diagrams --skill system-flow-diagrams
 ```
 
-Open the folder with your coding agent and ask:
+Select your agent if prompted. To target Codex in a script, append `--agent codex --yes`. In Codex, type `$system-flow-diagrams` or select it from `/skills`, then describe the diagram you want.
 
-> Read system-flow-diagrams/SKILL.md. Create checkout.html explaining our customer, API gateway, order service, payment provider, and notification worker. Show checkout as a sequence of interactions. Use the starter's existing controls and styling, with clear initial spacing.
+You can also [download the repository](https://github.com/ClarkOhlenbusch/system-flow-diagrams/archive/refs/heads/main.zip) or clone it and ask your coding agent to read `system-flow-diagrams/SKILL.md`. Keep the complete skill folder together so it can find the starter and layout guide.
 
-Then open the resulting HTML file in a browser. No package installation, build process, or running server is required. The HTML loads its libraries and fonts from CDNs, so it needs an internet connection.
+## Use the diagram
 
-For another project, copy the entire `system-flow-diagrams` folder and give your agent the path to its `SKILL.md`. The instructions are ordinary Markdown and can also be supplied directly to an agent; native skill installation is optional and depends on the agent you use.
+Open the generated HTML file in a browser. It needs an internet connection to load its libraries and fonts from CDNs. You can open the file directly without installing dependencies or running a server.
 
-## Try the examples
+- Click the phase buttons or press Space or Left/Right. Number keys jump to a phase, with **0** for Map.
+- Drag cards to move them. Their connections follow. Drag a boundary header or border to move the boundary independently, or drag its lower-right corner to resize it.
+- Drag empty canvas to pan. Use Ctrl, Cmd, or Alt with scroll, or use +/− to zoom. Press **F** to fit and **R** to restore the saved layout.
 
-- [How this skill works](how-it-works.html): the skill, reference, coding agent, HTML artifact, and presenter.
-- [Generic checkout starter](system-flow-diagrams/assets/starter.html): a small service communication example you can adapt.
+Edits on the canvas last for the current page session. Update the diagram data in the HTML file to save a layout.
 
-Download and open these HTML files, or use the live links above. GitHub's file browser displays source.
+## Customize the starter
 
-Use the bottom phase buttons, Space, or Left/Right to advance. Drag cards; their connections follow. Drag boundary headers/borders to move them, and corners to resize them. Pan empty canvas. Ctrl/Cmd/Alt + scroll or +/- zooms. F fits, R resets, and numeric keys select phases. Boundary movement is independent of the cards inside it. Adjustments last for the current page session; edit the source to preserve a layout.
-
-## Keep agent token use small
-
-The starter already contains the working interaction and rendering code. Copy it through a filesystem operation, then patch only the section between `BEGIN DIAGRAM DATA` and `END DIAGRAM DATA`:
+Copy the starter and edit the section between `BEGIN DIAGRAM DATA` and `END DIAGRAM DATA`. It contains three definitions:
 
 - `INITIAL_NODES` defines components and placement.
 - `INITIAL_ENVELOPES` defines labeled boundaries.
 - `STORYBOARD_STEPS` defines messages and highlights for each phase.
 
-For ordinary edits, agents do not need to read or regenerate the runtime. The short `SKILL.md` contains the common workflow; the longer layout guide is loaded when composition needs it. Changes to interaction behavior can still inspect and edit the relevant helpers. Keep the source readable rather than minifying it.
+The [skill instructions](system-flow-diagrams/SKILL.md) describe the authoring workflow. The [layout guide](system-flow-diagrams/references/layout.md) covers spacing, label and port choices, boundary fitting, and verification.
 
 ## Share a live demo with GitHub Pages
 
-After pushing the repository, open **Settings → Pages**. Choose **Deploy from a branch**, **main**, and **/(root)**, then save. The included `index.html` opens the how-it-works diagram; `.nojekyll` keeps the files static. Your repo's Pages settings will show the actual published URL after deployment.
-
-The demo's HTML is the same artifact people download; there is no separate website application.
+For a fork, open **Settings → Pages**, choose **Deploy from a branch**, select **main** and **/(root)**, then save. The included `index.html` opens the walkthrough, and `.nojekyll` keeps the files static.
 
 ## Contribute
 
-Preserve the working canvas and minimal controls. For changes to the starter, inspect every phase and test dragging after pan/zoom, independent boundary movement/resizing, navigation, and reset. Check labels and paths at both presentation and laptop sizes. Report any browser-verification limit. Use generic examples without private architecture details.
+Preserve the working canvas and minimal controls. For changes to the starter, inspect every phase and test dragging after pan and zoom, independent boundary movement and resizing, navigation, and reset. Check labels and paths at both presentation and laptop sizes. Use generic examples without private architecture details.
 
 Licensed under [MIT](LICENSE). CDN-provided dependencies retain their own licenses.
