@@ -11,11 +11,7 @@ An open-source Agent Skill for turning architecture and API flows into interacti
   <a href="#contributing">Contribute</a>
 </p>
 
-<p align="center">
-  <a href="https://clarkohlenbusch.github.io/system-flow-diagrams/examples/webhook-delivery.html">
-    <img src="examples/screenshots/webhook-walkthrough.gif" alt="Webhook walkthrough switches from Queue to Process, then moves the delivery worker while its arrows follow." width="1140">
-  </a>
-</p>
+[![Webhook walkthrough switches from Queue to Process, then moves the delivery worker while its arrows follow.](examples/screenshots/webhook-walkthrough.gif)](https://clarkohlenbusch.github.io/system-flow-diagrams/examples/webhook-delivery.html)
 
 The demo follows a signed webhook through a receiver, queue, worker, and event store. Click a phase to see its messages, or drag a service and watch its arrows follow. [HTML source](examples/webhook-delivery.html) · [Still image](examples/screenshots/webhook-processing.png)
 
@@ -31,7 +27,7 @@ Ask your agent to use `system-flow-diagrams`. In Codex, type `$system-flow-diagr
 
 > Create an interactive HTML diagram of our webhook flow. Show signature validation, queuing before HTTP 202, and processing by the background worker.
 
-Open the generated HTML in your browser. Use the phase buttons or arrow keys to advance, **F** to fit, and **R** to reset. The page loads its libraries and fonts over the internet.
+Open the generated HTML in your browser. Use the phase buttons or arrow keys to advance, **F** to fit, and **R** to reset.
 
 For manual setup, keep the skill folder together and point your agent at its instructions. [Download the repository](https://github.com/ClarkOhlenbusch/system-flow-diagrams/archive/refs/heads/main.zip) · [Read the skill](system-flow-diagrams/SKILL.md)
 
@@ -40,6 +36,10 @@ For manual setup, keep the skill folder together and point your agent at its ins
 Follow a checkout from identity verification to payment authorization and receipt delivery. [Live demo](https://clarkohlenbusch.github.io/system-flow-diagrams/system-flow-diagrams/assets/starter.html) · [HTML source](system-flow-diagrams/assets/starter.html)
 
 [![Checkout diagram showing authorization and approval arrows between the order service and payment provider](examples/screenshots/checkout-payment.png)](https://clarkohlenbusch.github.io/system-flow-diagrams/system-flow-diagrams/assets/starter.html)
+
+## What the plugin uses
+
+The skill copies a bundled starter and writes diagram data into the HTML file in your project. When you open a diagram, your browser loads libraries from `cdn.tailwindcss.com` and `unpkg.com` and fonts from `fonts.googleapis.com` and `fonts.gstatic.com`.
 
 ## Contributing
 

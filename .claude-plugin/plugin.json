@@ -1,0 +1,18 @@
+{
+  "name": "system-flow-diagrams",
+  "displayName": "System Flow Diagrams",
+  "version": "1.0.0",
+  "description": "Turn software architecture, API requests, and event-driven workflows into interactive HTML diagrams with draggable services, labeled arrows, and step-by-step playback.",
+  "author": {
+    "name": "Clark Ohlenbusch",
+    "url": "https://github.com/ClarkOhlenbusch"
+  },
+  "homepage": "https://clarkohlenbusch.github.io/system-flow-diagrams/",
+  "repository": "https://github.com/ClarkOhlenbusch/system-flow-diagrams",
+  "license": "MIT",
+  "keywords": ["architecture", "diagram", "api", "system-design"],
+  "icon": "./assets/plugin-icon.png",
+  "documentationUrl": "https://github.com/ClarkOhlenbusch/system-flow-diagrams#readme",
+  "supportUrl": "https://github.com/ClarkOhlenbusch/system-flow-diagrams/issues",
+  "skills": "./system-flow-diagrams"
+}
