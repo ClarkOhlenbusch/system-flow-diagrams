@@ -29,3 +29,13 @@ Open the HTML in a browser with internet access. Files can be opened directly, w
 In your pull request, describe what changed and how you checked it. Include a screenshot for a visual change and note any browser checks you couldn't run.
 
 To publish a live demo from a fork, use **Settings → Pages → Deploy from a branch** and select `main` and `/(root)`. The included `index.html` opens the walkthrough, and `.nojekyll` keeps the files static.
+
+## Package a marketplace release
+
+Bump the version in [the Claude plugin manifest](.claude-plugin/plugin.json) when releasing plugin changes. Claude's directory takes the repository URL and discovers the manifest at the root. OpenAI's directory takes a ZIP through its **Skills only** submission flow. Build that archive from the repository root:
+
+```sh
+python3 scripts/package_plugin.py system-flow-diagrams.zip
+```
+
+The ZIP includes the tracked skill files, license, manifest, and listing icon.
