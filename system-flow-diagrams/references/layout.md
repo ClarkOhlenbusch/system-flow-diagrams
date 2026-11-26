@@ -8,7 +8,7 @@ Place actors and service families in meaningful lanes: often callers on the left
 
 Size cards from their actual content before choosing positions. The starter's `getNodeDimensions` accounts for title, subtitle, badge, and ID footer. Nominal `width` is a minimum; long badges can widen a card. Ports, envelopes, and route checks must use the computed width and height.
 
-Widths around 240–280 units, horizontal gaps around 160–220 units, and vertical clearances around 80–140 units are starting points. Budget for the actual labels that must fit between cards, rather than choosing spacing solely from card rectangles. Align comparable services and leave clear corridors for the busiest phase.
+Widths around 240–280 units, horizontal gaps around 240–280 units, and vertical clearances around 80–140 units are starting points. For a horizontal message, leave a gap at least as wide as its full numbered label chip plus 64 units (32 clear on each side). Increase that gap for longer labels or boundary padding. Use computed card widths, not just their declared minimums. Align comparable services and leave clear corridors for the busiest phase.
 
 The mesh is a spatial guide. Do not lock objects into cells or prevent manual repositioning.
 
@@ -31,7 +31,7 @@ Use side/sub-side ports to separate paths:
 
 The curve control points extend along the selected port normals. An optional link `reach` adjusts their distance. Parallel request/response links need distinct ports and enough room for their chips. Do not put two full-width chips into a corridor that only fits one.
 
-Evaluate each phase's active links against all cards and boundary headings. Avoid wire crossings, routes through unrelated cards, labels over unrelated wires, and collisions between label boxes. The Bezier midpoint is a candidate for a chip, not an assurance of good placement.
+Evaluate each phase's active links against all cards and boundary headings. Keep at least 32 units between label chips and cards, and 16 between neighboring chips. Avoid wire crossings, routes through unrelated cards, labels over unrelated wires, and collisions between label boxes. The Bezier midpoint is a candidate for a chip, not an assurance of good placement.
 
 Fix a crowded route by choosing better ports/reach, increasing the relevant gap, or rearranging its components. If moving a chip along the curve is necessary, adapt `getLinkGeometry` and label rendering together so it still follows the moving nodes. Do not invent unsupported data fields and expect them to work. Shorten/wrap a label when its meaning remains clear. Do not hide labels to make a layout pass.
 
@@ -47,4 +47,4 @@ Boundaries stay behind wires and cards. Moving a boundary does not move its card
 
 The starter's `fitView` includes computed card sizes, envelopes, route control points, and label extents across all phases. It uses the actual canvas and dock rectangles, with a dynamic viewport height and mobile safe-area spacing. Preserve that calculation rather than hard-coded zoom breakpoints. On phones, users can pinch into the fitted map and pan; keep logical positions stable instead of stacking cards into a different flow. Small text should not be made unreadable to disguise an overcrowded map; simplify the phase or improve its composition.
 
-Check presentation and laptop sizes. Inspect the overview and every phase, with special attention to the busiest phase. The first frame should already be presentable without dragging. Browser interaction checks remain necessary even when geometry checks pass.
+Check presentation and laptop sizes. Inspect the overview and every phase, with special attention to the busiest phase. After fonts load, check rendered card and chip bounds as well as calculated geometry; CSS content can make a card taller than its minimum height. Reload and check the initial layout again. The first frame should already be presentable without dragging. Browser interaction checks remain necessary even when geometry checks pass.

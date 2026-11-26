@@ -1,7 +1,7 @@
 {
   "name": "system-flow-diagrams",
   "displayName": "System Flow Diagrams",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Turn software architecture, API requests, and event-driven workflows into interactive HTML diagrams with draggable services, labeled arrows, and step-by-step playback.",
   "author": {
     "name": "Clark Ohlenbusch",
