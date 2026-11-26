@@ -45,6 +45,6 @@ Boundaries stay behind wires and cards. Moving a boundary does not move its card
 
 ## Fit the viewport
 
-The starter's `fitView` includes computed card sizes, envelopes, route control points, and label extents across all phases. Preserve that calculation and its space for the bottom dock. Do not replace it with hard-coded zoom breakpoints. Small text should not be made unreadable to disguise an overcrowded map; simplify the phase or improve its composition.
+The starter's `fitView` includes computed card sizes, envelopes, route control points, and label extents across all phases. It uses the actual canvas and dock rectangles, with a dynamic viewport height and mobile safe-area spacing. Preserve that calculation rather than hard-coded zoom breakpoints. On phones, users can pinch into the fitted map and pan; keep logical positions stable instead of stacking cards into a different flow. Small text should not be made unreadable to disguise an overcrowded map; simplify the phase or improve its composition.
 
 Check presentation and laptop sizes. Inspect the overview and every phase, with special attention to the busiest phase. The first frame should already be presentable without dragging. Browser interaction checks remain necessary even when geometry checks pass.

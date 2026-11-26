@@ -25,6 +25,15 @@ Open the HTML in a browser with internet access. Files can be opened directly, w
 
 - For layout changes or new examples, check every phase at presentation and laptop sizes. Look for overlaps, clipped content, and arrows that cross unrelated cards or boundary headings.
 - For interaction changes, test card dragging after panning and zooming, boundary movement and resizing, dock and keyboard navigation, Fit, and Reset.
+- On mobile, test portrait/landscape pinch-to-zoom starting over cards, two-finger panning, the transition to one-finger panning, and swiping/tapping the dock. State whether checks used device emulation or physical hardware.
+
+The gesture regression tests use Node's built-in test runner, with no package installation:
+
+```sh
+node --test tests/mobile-gestures.test.cjs
+```
+
+These check the handlers embedded in all three public diagrams. Browser interaction checks are still needed for pointer capture, native dock scrolling, and viewport layout.
 
 In your pull request, describe what changed and how you checked it. Include a screenshot for a visual change and note any browser checks you couldn't run.
 

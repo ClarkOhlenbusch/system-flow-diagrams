@@ -27,23 +27,26 @@ For initial composition or a crowded phase, consult [references/layout.md](refer
 
 - A subtle 24px dotted mesh, compact white cards, semantic color badges, and softly tinted labeled boundaries.
 - Independently movable cards; their wires, labels, dots, and arrowheads follow them at every zoom.
+- On touchscreens, two fingers pinch to zoom around their midpoint and pan the canvas. One finger can pan empty canvas or move a card. Adding/removing a finger must not unexpectedly move a card or jump the view. Keep the dock horizontally swipeable with reachable touch targets and safe-area spacing.
 - Boundaries move independently of cards. Their headers/borders drag; their lower-right corners resize.
 - Curved directed wires with separate ports for request/response paths. Every message has a visible white label chip coordinated with its wire color.
 - A deliberate initial layout: no overlapping cards or labels, wires through unrelated cards, crowded boundary headings, or clipped content. Dragging is for presentation, not initial repair.
 - Only the current phase's wires are shown. Cards keep their positions as the flow advances. The overview normally shows the map without wires.
 - A small bottom dock: Map, short phase buttons, previous/next, and Fit. Keep Space/arrow navigation, numeric step selection, R reset, F fit, and zoom. Do not add an application shell or other panels unless requested.
 
-The shared runtime already provides pointer capture, scale-aware movement, live port-based curves, label sizing, reduced-motion support, and fit-to-content including routes. Preserve those improvements.
+The shared runtime already provides multi-touch pinch/pan, pointer capture, scale-aware movement, live port-based curves, label sizing, reduced-motion support, and fit-to-content including routes. Preserve those improvements and the dynamic-height mobile viewport.
 
 ## Targeted implementation work
 
-When a behavior change is required, locate its helper rather than reading the whole file: `startDrag` / pointer handlers, `getNodeDimensions`, `getAnchorPoint`, `getLabelBoxWidth`, `getLinkGeometry`, `fitView`, or the bottom dock/keyboard handler. Use computed card sizes for ports and envelope fit. Label sizing must include the actual displayed arrow and message number. Keep reset definitions and numeric step limits consistent with the new data.
+When a behavior change is required, locate its helper rather than reading the whole file: `handleTouchStart` / `handleTouchMove` / `handleTouchEnd`, `startDrag` / pointer handlers, `getNodeDimensions`, `getAnchorPoint`, `getLabelBoxWidth`, `getLinkGeometry`, `fitView`, or the bottom dock/keyboard handler. Use computed card sizes for ports and envelope fit. Label sizing must include the actual displayed arrow and message number. Keep reset definitions and numeric step limits consistent with the new data.
 
 Do not minify authoring code. Do not introduce a package, CLI, build pipeline, or separate rendering framework for an ordinary diagram.
 
 ## Verify and deliver
 
 Check IDs/endpoints, actual card dimensions, boundary padding, and every phase's labels/routes, especially the busiest phase. Test dragging after pan/zoom, independent boundary move/resize, step navigation with manual positions retained, and reset. Inspect at presentation size and a smaller laptop viewport when a browser is available.
+
+Also test a narrow phone in portrait and landscape: pinch starting over a card, move the two fingers together, lift one and continue panning, and swipe/tap the dock. Touch zoom must work from the initial Fit scale, even below 0.3. Emulated touch testing does not establish behavior on a physical iPhone or Android device; distinguish those checks when reporting verification.
 
 If browser inspection is unavailable, check source/geometry and report the visual/interaction verification limit. Do not call an unviewed diagram visually verified.
 
