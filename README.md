@@ -27,7 +27,7 @@ Ask your agent to use `system-flow-diagrams`. In Codex, type `$system-flow-diagr
 
 > Create an interactive HTML diagram of our webhook flow. Show signature validation, queuing before HTTP 202, and processing by the background worker.
 
-Open the generated HTML in your browser. Use the phase buttons or arrow keys to advance, **F** to fit, and **R** to reset.
+Open the generated HTML in your browser. Use the phase buttons or arrow keys to advance, **F** to fit, and **R** to reset. On a phone, **pinch with two fingers to zoom**, move both fingers to pan, and swipe the phase bar to reach more steps. One finger can drag a card or pan empty canvas. Tap **Fit** to see the whole diagram again.
 
 For manual setup, keep the skill folder together and point your agent at its instructions. [Download the repository](https://github.com/ClarkOhlenbusch/system-flow-diagrams/archive/refs/heads/main.zip) · [Read the skill](system-flow-diagrams/SKILL.md)
 

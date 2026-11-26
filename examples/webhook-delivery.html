@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Order checkout - System-flow diagrams</title>
   <meta property="og:type" content="website">
   <meta property="og:title" content="Webhook delivery · System Flow Diagrams">
@@ -121,9 +121,27 @@
     .envelope-box:hover {
       box-shadow: 0 8px 25px -4px rgba(15, 23, 42, 0.08);
     }
+
+    /* Canvas gestures stay separate from the horizontally scrollable dock. */
+    .diagram-viewport { height: 100vh; height: 100dvh; }
+    .flow-steps { min-width: 0; touch-action: pan-x; overscroll-behavior-x: contain; scrollbar-width: none; }
+    .flow-steps::-webkit-scrollbar { display: none; }
+    .flow-navigation { flex-shrink: 0; }
+    @media (max-width: 600px), (pointer: coarse) {
+      .flow-dock.flow-dock {
+        bottom: max(8px, env(safe-area-inset-bottom));
+        padding-left: max(8px, env(safe-area-inset-left));
+        padding-right: max(8px, env(safe-area-inset-right));
+      }
+      .flow-dock .dock-pill { padding: 4px; border-radius: 14px; }
+      .flow-dock button { min-height: 44px; }
+      .flow-steps > button { flex-shrink: 0; padding: 10px 12px; }
+      .flow-navigation { padding-left: 4px; gap: 2px; }
+      .flow-navigation > button { width: 44px; height: 44px; }
+    }
   </style>
 </head>
-<body class="w-screen h-screen overflow-hidden bg-academic-grid">
+<body class="w-screen overflow-hidden bg-academic-grid">
   <div id="root"></div>
 
   <script type="text/babel">
@@ -336,6 +354,10 @@
 
       const currentStep = STORYBOARD_STEPS[currentStepIndex];
       const dragState = useRef(null);
+      const touchPoints = useRef(new Map());
+      const pinchState = useRef(null);
+      const viewState = useRef({ zoom, pan });
+      viewState.current = { zoom, pan };
       const canvasElement = useRef(null);
       const canvasState = useRef({ nodes, envelopes });
       canvasState.current = { nodes, envelopes };
@@ -349,6 +371,7 @@
 
       useEffect(() => {
         document.title = currentStep.title + ' - System-flow diagrams';
+        canvasElement.current.querySelector('[aria-current="step"]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
       }, [currentStepIndex]);
 
       useEffect(() => {
@@ -377,20 +400,96 @@
           } else if (e.key.toLowerCase() === 'f') {
             fitView();
           } else if (e.key === '+' || e.key === '=') {
-            setZoom(z => Math.min(2, z * 1.08));
+            zoomAtCenter(1.08);
           } else if (e.key === '-' || e.key === '_') {
-            setZoom(z => Math.max(0.3, z / 1.08));
+            zoomAtCenter(1 / 1.08);
           }
         };
         window.addEventListener('keydown', keyDown);
         return () => window.removeEventListener('keydown', keyDown);
       }, []);
 
+      const clampZoom = value => Math.max(0.05, Math.min(4, value));
+      const applyView = (nextZoom, nextPan) => {
+        viewState.current = { zoom: nextZoom, pan: nextPan };
+        setZoom(nextZoom); setPan(nextPan);
+      };
+      const canvasPoint = (x, y) => {
+        const rect = canvasElement.current.getBoundingClientRect();
+        return { x: x - rect.left, y: y - rect.top };
+      };
+      const zoomAt = (point, factor) => {
+        const view = viewState.current, next = clampZoom(view.zoom * factor);
+        applyView(next, {
+          x: point.x - (point.x - view.pan.x) * next / view.zoom,
+          y: point.y - (point.y - view.pan.y) * next / view.zoom
+        });
+      };
+      const zoomAtCenter = factor => {
+        const rect = canvasElement.current.getBoundingClientRect();
+        zoomAt({ x: rect.width / 2, y: rect.height / 2 }, factor);
+      };
+      const clearDrag = () => {
+        dragState.current = null;
+        setDraggingNodeId(null); setDraggingEnvelopeId(null); setResizingEnvelopeId(null); setIsPanning(false);
+      };
+      const clearGesture = () => {
+        touchPoints.current.clear(); pinchState.current = null; clearDrag();
+      };
+      const beginPinch = () => {
+        const [a, b] = [...touchPoints.current.values()];
+        const midpoint = canvasPoint((a.x + b.x) / 2, (a.y + b.y) / 2);
+        const view = viewState.current;
+        clearDrag();
+        pinchState.current = {
+          ids: [a.id, b.id], distance: Math.max(1, Math.hypot(b.x - a.x, b.y - a.y)), zoom: view.zoom,
+          anchor: { x: (midpoint.x - view.pan.x) / view.zoom, y: (midpoint.y - view.pan.y) / view.zoom }
+        };
+      };
+      // Capture touch points before a card/envelope can stop event propagation.
+      const handleTouchStart = e => {
+        if (e.pointerType !== 'touch' || e.target.closest('.flow-dock')) return;
+        touchPoints.current.set(e.pointerId, { id: e.pointerId, x: e.clientX, y: e.clientY });
+        if (touchPoints.current.size >= 2) {
+          if (!pinchState.current) beginPinch();
+          canvasElement.current.setPointerCapture(e.pointerId);
+          e.preventDefault(); e.stopPropagation();
+        }
+      };
+      const handleTouchMove = e => {
+        if (!touchPoints.current.has(e.pointerId)) return;
+        touchPoints.current.set(e.pointerId, { id: e.pointerId, x: e.clientX, y: e.clientY });
+        const pinch = pinchState.current;
+        if (!pinch) return;
+        const [a, b] = pinch.ids.map(id => touchPoints.current.get(id));
+        const midpoint = canvasPoint((a.x + b.x) / 2, (a.y + b.y) / 2);
+        const next = clampZoom(pinch.zoom * Math.hypot(b.x - a.x, b.y - a.y) / pinch.distance);
+        applyView(next, { x: midpoint.x - pinch.anchor.x * next, y: midpoint.y - pinch.anchor.y * next });
+        e.preventDefault(); e.stopPropagation();
+      };
+      const handleTouchEnd = e => {
+        if (!touchPoints.current.delete(e.pointerId)) return;
+        if (!pinchState.current) return;
+        if (touchPoints.current.size >= 2) beginPinch();
+        else {
+          pinchState.current = null;
+          const remaining = [...touchPoints.current.values()][0];
+          clearDrag();
+          // After a pinch, one remaining finger pans; it never resumes moving a card.
+          if (remaining) {
+            const view = viewState.current;
+            dragState.current = { mode: 'pan', pointerId: remaining.id, x: remaining.x, y: remaining.y, pan: { ...view.pan }, zoom: view.zoom };
+            setIsPanning(true);
+          }
+        }
+        e.stopPropagation();
+      };
       const startDrag = (e, mode, item) => {
-        if (e.button !== 0) return;
+        if (e.button !== 0 || pinchState.current) return;
         e.stopPropagation(); e.preventDefault();
         e.currentTarget.setPointerCapture(e.pointerId);
-        dragState.current = { mode, item: item ? { ...item } : null, x: e.clientX, y: e.clientY, pan: { ...pan }, zoom };
+        const view = viewState.current;
+        dragState.current = { mode, pointerId: e.pointerId, item: item ? { ...item } : null, x: e.clientX, y: e.clientY, pan: { ...view.pan }, zoom: view.zoom };
         setDraggingNodeId(mode === 'node' ? item.id : null);
         setDraggingEnvelopeId(mode === 'envelope' ? item.id : null);
         setResizingEnvelopeId(mode === 'resize' ? item.id : null);
@@ -398,31 +497,34 @@
       };
       const handleMouseDownNode = (e, id) => startDrag(e, 'node', nodes.find(n => n.id === id));
       const handleMouseDownEnvelope = (e, id) => {
-        const box = e.currentTarget.getBoundingClientRect(), pad = 10 * zoom;
+        const currentZoom = viewState.current.zoom;
+        const box = e.currentTarget.getBoundingClientRect(), pad = 10 * currentZoom;
         const border = e.clientX - box.left < pad || box.right - e.clientX < pad || box.bottom - e.clientY < pad;
-        if (border || e.clientY - box.top < 50 * zoom) startDrag(e, 'envelope', envelopes.find(env => env.id === id));
+        if (border || e.clientY - box.top < 50 * currentZoom) startDrag(e, 'envelope', envelopes.find(env => env.id === id));
       };
       const handleMouseDownResize = (e, id) => startDrag(e, 'resize', envelopes.find(env => env.id === id));
       const handleMouseDownCanvas = (e) => startDrag(e, 'pan', null);
       const handleMouseMove = (e) => {
         const d = dragState.current;
-        if (!d) return;
+        if (!d || d.pointerId !== e.pointerId || pinchState.current) return;
         const dx = (e.clientX - d.x) / d.zoom, dy = (e.clientY - d.y) / d.zoom;
         if (d.mode === 'node') setNodes(prev => prev.map(n => n.id === d.item.id ? { ...n, x: d.item.x + dx, y: d.item.y + dy } : n));
         else if (d.mode === 'envelope') setEnvelopes(prev => prev.map(env => env.id === d.item.id ? { ...env, x: d.item.x + dx, y: d.item.y + dy } : env));
         else if (d.mode === 'resize') setEnvelopes(prev => prev.map(env => env.id === d.item.id ? { ...env, width: Math.max(240, d.item.width + dx), height: Math.max(140, d.item.height + dy) } : env));
-        else setPan({ x: d.pan.x + e.clientX - d.x, y: d.pan.y + e.clientY - d.y });
+        else applyView(viewState.current.zoom, { x: d.pan.x + e.clientX - d.x, y: d.pan.y + e.clientY - d.y });
       };
-      const handleMouseUp = () => {
-        dragState.current = null;
-        setDraggingNodeId(null); setDraggingEnvelopeId(null); setResizingEnvelopeId(null); setIsPanning(false);
+      const handleMouseUp = e => {
+        if (dragState.current?.pointerId === e.pointerId) clearDrag();
+      };
+      const handleLostCapture = e => {
+        // A child may lose capture because the canvas took over a second touch.
+        if (canvasElement.current.hasPointerCapture(e.pointerId)) return;
+        handleTouchEnd(e); handleMouseUp(e);
       };
       const handleWheel = (e) => {
         if (e.ctrlKey || e.metaKey || e.altKey) {
           e.preventDefault();
-          const next = Math.max(0.3, Math.min(2, zoom * (e.deltaY < 0 ? 1.06 : 1 / 1.06)));
-          setPan({ x: e.clientX - (e.clientX - pan.x) * next / zoom, y: e.clientY - (e.clientY - pan.y) * next / zoom });
-          setZoom(next);
+          zoomAt(canvasPoint(e.clientX, e.clientY), e.deltaY < 0 ? 1.06 : 1 / 1.06);
         }
       };
 
@@ -522,30 +624,40 @@
         const left = Math.min(...boxes.map(b => b.x)), top = Math.min(...boxes.map(b => b.y));
         const width = Math.max(...boxes.map(b => b.x + b.width)) - left;
         const height = Math.max(...boxes.map(b => b.y + b.height)) - top;
-        const scale = Math.min(1.2, (window.innerWidth - 64) / width, (window.innerHeight - 120) / height);
-        setZoom(scale);
-        setPan({ x: (window.innerWidth - width * scale) / 2 - left * scale,
-          y: 24 + (window.innerHeight - 120 - height * scale) / 2 - top * scale });
+        const rect = canvasElement.current.getBoundingClientRect();
+        const dock = canvasElement.current.querySelector('.flow-dock').getBoundingClientRect();
+        const padding = rect.width <= 600 ? 16 : 32;
+        const availableWidth = Math.max(1, rect.width - padding * 2);
+        const availableHeight = Math.max(1, dock.top - rect.top - padding * 2);
+        const scale = clampZoom(Math.min(1.2, availableWidth / width, availableHeight / height));
+        clearGesture();
+        applyView(scale, { x: padding + (availableWidth - width * scale) / 2 - left * scale,
+          y: padding + (availableHeight - height * scale) / 2 - top * scale });
       };
 
       return (
         <div
           ref={canvasElement}
+          onPointerDownCapture={handleTouchStart}
+          onPointerMoveCapture={handleTouchMove}
+          onPointerUpCapture={handleTouchEnd}
+          onPointerCancelCapture={handleTouchEnd}
           onPointerDown={handleMouseDownCanvas}
           onPointerMove={handleMouseMove}
           onPointerUp={handleMouseUp}
           onPointerCancel={handleMouseUp}
-          onLostPointerCapture={handleMouseUp}
-          style={{ touchAction: 'none' }}
-          className={`w-screen h-screen relative select-none overflow-hidden ${
+          onLostPointerCapture={handleLostCapture}
+          className={`diagram-viewport w-screen relative select-none overflow-hidden ${
             isPanning ? 'cursor-grabbing' : 'cursor-default'
           }`}
         >
+          <div className="absolute inset-0" style={{ touchAction: 'none' }} />
           {/* MAIN TRANSFORMABLE CANVAS CONTAINER (ZOOM + PAN) */}
           <div
             style={{
               transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
               transformOrigin: '0 0',
+              touchAction: 'none',
               width: '3000px',
               height: '1800px'
             }}
@@ -741,11 +853,11 @@
           </div>
 
           {/* MINIMAL FLOATING BOTTOM DOCK */}
-          <div onPointerDown={(e) => e.stopPropagation()} className="absolute bottom-5 left-1/2 -translate-x-1/2 z-40 max-w-2xl w-full px-4">
+          <div onPointerDown={(e) => e.stopPropagation()} className="flow-dock absolute bottom-5 left-1/2 -translate-x-1/2 z-40 max-w-2xl w-full px-4">
             <div className="dock-pill rounded-2xl p-1.5 flex items-center justify-between space-x-1 shadow-xl">
 
               {/* Step Buttons */}
-              <div className="flex items-center space-x-1 overflow-x-auto flex-1">
+              <div className="flow-steps flex items-center space-x-1 overflow-x-auto flex-1">
                 {STORYBOARD_STEPS.map((step, idx) => (
                   <button
                     key={step.id}
@@ -764,11 +876,12 @@
               </div>
 
               {/* Navigation Arrows & Talk Track Trigger */}
-              <div className="flex items-center space-x-1 pl-2 border-l border-slate-200">
+              <div className="flow-navigation flex items-center space-x-1 pl-2 border-l border-slate-200">
                 <button
                   onClick={() => setCurrentStepIndex(prev => (prev > 0 ? prev - 1 : STORYBOARD_STEPS.length - 1))}
                   className="w-8 h-8 rounded-lg bg-white hover:bg-slate-100 text-slate-700 flex items-center justify-center text-xs border border-slate-200"
                   title="Previous (←)"
+                  aria-label="Previous phase"
                 >
                   ←
                 </button>
@@ -776,6 +889,7 @@
                   onClick={() => setCurrentStepIndex(prev => (prev < STORYBOARD_STEPS.length - 1 ? prev + 1 : 0))}
                   className="w-8 h-8 rounded-lg bg-slate-900 hover:bg-slate-800 text-white flex items-center justify-center text-xs font-bold shadow"
                   title="Next (Space / →)"
+                  aria-label="Next phase"
                 >
                   →
                 </button>
